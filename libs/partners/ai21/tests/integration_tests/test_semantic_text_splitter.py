@@ -1,4 +1,5 @@
-from langchain_ai21 import AI21SegmentationTextSplitter
+from langchain_ai21 import AI21SemanticTextSplitter
+from langchain_core.documents import Document
 
 TEXT = """The original full name of the franchise is Pocket Monsters (ポケットモンスター, Poketto Monsutā), which was abbreviated to Pokemon during development of the original games.
 When the franchise was released internationally, the short form of the title was used, with an acute accent (´) over the e to aid in pronunciation.
@@ -23,7 +24,7 @@ As its level increases, the Pokémon can learn new offensive and defensive moves
 
 
 def test_invoke__split_text_to_document() -> None:
-    segmentation = AI21SegmentationTextSplitter()
+    segmentation = AI21SemanticTextSplitter()
     segments = segmentation.split_text_to_documents(
         source=TEXT)
     assert len(segments) > 0
@@ -33,7 +34,60 @@ def test_invoke__split_text_to_document() -> None:
 
 
 def test_invoke__split_text() -> None:
-    segmentation = AI21SegmentationTextSplitter()
+    segmentation = AI21SemanticTextSplitter()
     segments = segmentation.split_text(
         source=TEXT)
     assert len(segments) > 0
+
+def test_invoke__split_text__chunk_size() -> None:
+    segmentation_no_merge = AI21SemanticTextSplitter()
+    segments_no_merge = segmentation_no_merge.split_text(
+        source=TEXT)
+    segmentation_merge = AI21SemanticTextSplitter(chunk_size=1000)
+    segments_merge = segmentation_merge.split_text(
+        source=TEXT)
+    # Assert that a merge did happen
+    assert len(segments_no_merge) > len(segments_merge)
+    reconstructed_text_merged = "".join(segments_merge)
+    reconstructed_text_non_merged = "".join(segments_no_merge)
+    # Assert that the merge did not change the content
+    assert reconstructed_text_merged == reconstructed_text_non_merged
+
+
+def test_invoke__create_documents() -> None:
+    texts = [TEXT]
+    segmentation = AI21SemanticTextSplitter()
+    documents = segmentation.create_documents(texts=texts)
+    assert len(documents) > 0
+    for document in documents:
+        assert document.page_content is not None
+        assert document.metadata is not None
+
+
+def test_invoke__create_documents__add_start_index() -> None:
+    texts = [TEXT]
+    segmentation = AI21SemanticTextSplitter(add_start_index=True)
+    documents = segmentation.create_documents(texts=texts)
+    assert len(documents) > 0
+    previous_start_index = -1
+    for document in documents:
+        assert document.page_content is not None
+        assert document.metadata is not None
+        assert "start_index" in document.metadata
+        assert document.metadata["start_index"] != -1
+        assert document.metadata["start_index"] > previous_start_index
+        previous_start_index = document.metadata["start_index"]
+
+
+def test_invoke__split_documents() -> None:
+    documents = [Document(page_content=TEXT, metadata={"foo": "bar"})]
+    segmentation = AI21SemanticTextSplitter()
+    segments = segmentation.split_documents(documents=documents)
+    assert len(segments) > 0
+    for segment in segments:
+        assert segment.page_content is not None
+        assert segment.metadata is not None
+
+# def test_invoke__from_ai21_tokenizer() -> None:
+#     documents = [Document(page_content=TEXT, metadata={"foo": "bar"})]
+#     segmentation = AI21SemanticTextSplitter().from_ai21_tokenizer()
