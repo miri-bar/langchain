@@ -22,15 +22,25 @@ class AI21SemanticTextSplitter(TextSplitter):
     based on distinct topics and lines
     """
 
+    class Config:
+        """Configuration for this pydantic object."""
+        arbitrary_types_allowed = True
+
     def __init__(
             self,
-            chunk_size: int = 0,
-            chunk_overlap: int = 0,
+            chunk_size: Optional[int] = 0,
+            chunk_overlap: Optional[int] = 0,
+            client: Optional[Any] = None,
             **kwargs: Any
     ) -> None:
         """Create a new TextSplitter."""
-        super().__init__(chunk_size=chunk_size,chunk_overlap=chunk_overlap, **kwargs)
-        self._ai21 = AI21Base()
+        super().__init__(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            **kwargs,
+        )
+
+        self._client = client or AI21Base()
 
     def split_text(self, source: str) -> List[str]:
         """Split text into multiple components.
@@ -38,7 +48,7 @@ class AI21SemanticTextSplitter(TextSplitter):
         Args:
             source: Specifies the text input for text segmentation
         """
-        response = self._ai21.client.segmentation.create(
+        response = self._client.client.segmentation.create(
             source=source, source_type=DocumentType.TEXT
         )
         segments = [segment.segment_text for segment in response.segments]
@@ -52,7 +62,7 @@ class AI21SemanticTextSplitter(TextSplitter):
         Args:
             source: Specifies the text input for text segmentation
         """
-        response = self._ai21.client.segmentation.create(
+        response = self._client.client.segmentation.create(
             source=source,
             source_type=DocumentType.TEXT
         )
