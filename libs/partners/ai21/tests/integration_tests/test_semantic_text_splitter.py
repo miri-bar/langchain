@@ -1,5 +1,6 @@
 from langchain_ai21 import AI21SemanticTextSplitter
 from langchain_core.documents import Document
+from ai21 import AI21Client
 
 TEXT = """The original full name of the franchise is Pocket Monsters (ポケットモンスター, Poketto Monsutā), which was abbreviated to Pokemon during development of the original games.
 When the franchise was released internationally, the short form of the title was used, with an acute accent (´) over the e to aid in pronunciation.
@@ -35,17 +36,43 @@ def test_invoke__split_text_to_document() -> None:
 
 def test_invoke__split_text() -> None:
     segmentation = AI21SemanticTextSplitter()
-    segments = segmentation.split_text(
-        source=TEXT)
+    segments = segmentation.split_text(source=TEXT)
     assert len(segments) > 0
+
 
 def test_invoke__split_text__chunk_size() -> None:
     segmentation_no_merge = AI21SemanticTextSplitter()
-    segments_no_merge = segmentation_no_merge.split_text(
-        source=TEXT)
+    segments_no_merge = segmentation_no_merge.split_text(source=TEXT)
     segmentation_merge = AI21SemanticTextSplitter(chunk_size=1000)
-    segments_merge = segmentation_merge.split_text(
-        source=TEXT)
+    segments_merge = segmentation_merge.split_text(source=TEXT)
+    # Assert that a merge did happen
+    assert len(segments_no_merge) > len(segments_merge)
+    reconstructed_text_merged = "".join(segments_merge)
+    reconstructed_text_non_merged = "".join(segments_no_merge)
+    # Assert that the merge did not change the content
+    assert reconstructed_text_merged == reconstructed_text_non_merged
+
+
+def test_invoke__split_text__chunk_size__small_chunk_size() -> None:
+    segmentation_no_merge = AI21SemanticTextSplitter()
+    segments_no_merge = segmentation_no_merge.split_text(source=TEXT)
+    segmentation_merge = AI21SemanticTextSplitter(chunk_size=10)
+    segments_merge = segmentation_merge.split_text(source=TEXT)
+    # Assert that a merge did happen
+    assert len(segments_no_merge) == len(segments_merge)
+    reconstructed_text_merged = "".join(segments_merge)
+    reconstructed_text_non_merged = "".join(segments_no_merge)
+    # Assert that the merge did not change the content
+    assert reconstructed_text_merged == reconstructed_text_non_merged
+
+
+def test_invoke__split_text__chunk_size__ai21_tokenizer() -> None:
+    segmentation_no_merge = AI21SemanticTextSplitter(length_function=AI21Client().count_tokens)
+    segments_no_merge = segmentation_no_merge.split_text(source=TEXT)
+    segmentation_merge = AI21SemanticTextSplitter(
+        chunk_size=1000,
+        length_function=AI21Client().count_tokens)
+    segments_merge = segmentation_merge.split_text(source=TEXT)
     # Assert that a merge did happen
     assert len(segments_no_merge) > len(segments_merge)
     reconstructed_text_merged = "".join(segments_merge)
@@ -87,7 +114,3 @@ def test_invoke__split_documents() -> None:
     for segment in segments:
         assert segment.page_content is not None
         assert segment.metadata is not None
-
-# def test_invoke__from_ai21_tokenizer() -> None:
-#     documents = [Document(page_content=TEXT, metadata={"foo": "bar"})]
-#     segmentation = AI21SemanticTextSplitter().from_ai21_tokenizer()

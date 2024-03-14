@@ -73,14 +73,6 @@ class AI21SemanticTextSplitter(TextSplitter):
                 documents.append(new_doc)
         return documents
 
-    # TODO:
-    # @classmethod
-    # def from_ai21_tokenizer(cls, tokenizer: Any, **kwargs: Any) -> AI21SemanticTextSplitter:
-    #     """Text splitter that uses AI21 tokenizer to count length."""
-    #
-    #     return cls(length_function=AI21Base.client.count_tokens, **kwargs)
-
-
     def _replace_continued_newlines(self, string: str) -> str:
         """Use regular expression to replace sequences of '\n'"""
         return re.sub(r'\n{2,}', '\n', string)
@@ -90,14 +82,18 @@ class AI21SemanticTextSplitter(TextSplitter):
 
     def _merge_splits_no_seperator(self, splits: Iterable[str]) -> List[str]:
         """Merge splits into chunks."""
-        # TODO - change logic to be on tokens len
         chunks = []
         current_chunk = ""
         for split in splits:
-            if len(current_chunk) + len(split) > self._chunk_size:
-                chunks.append(current_chunk)
-                current_chunk = ""
+            split_len = self._length_function(split)
+            if split_len > self._chunk_size:
+                logger.warning(f"Split of length {split_len} exceeds chunk size {self._chunk_size}.")
+            if self._length_function(current_chunk) + split_len > self._chunk_size:
+                if current_chunk != "":
+                    chunks.append(current_chunk)
+                    current_chunk = ""
             current_chunk += split
-        if current_chunk:
+        if current_chunk != "":
             chunks.append(current_chunk)
         return chunks
+
