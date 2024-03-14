@@ -40,7 +40,7 @@ class AI21SemanticTextSplitter(TextSplitter):
             **kwargs,
         )
 
-        self._client = client or AI21Base()
+        self._ai21_base = AI21Base(client=client)
 
     def split_text(self, source: str) -> List[str]:
         """Split text into multiple components.
@@ -48,7 +48,7 @@ class AI21SemanticTextSplitter(TextSplitter):
         Args:
             source: Specifies the text input for text segmentation
         """
-        response = self._client.client.segmentation.create(
+        response = self._ai21_base.client.segmentation.create(
             source=source, source_type=DocumentType.TEXT
         )
         segments = [segment.segment_text for segment in response.segments]
@@ -62,7 +62,7 @@ class AI21SemanticTextSplitter(TextSplitter):
         Args:
             source: Specifies the text input for text segmentation
         """
-        response = self._client.client.segmentation.create(
+        response = self._ai21_base.client.segmentation.create(
             source=source,
             source_type=DocumentType.TEXT
         )
