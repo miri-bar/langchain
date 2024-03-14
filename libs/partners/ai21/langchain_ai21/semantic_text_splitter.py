@@ -1,21 +1,26 @@
-from typing import (
-    Any,
-    List,
-    Optional, Iterable,
-)
-
 import copy
 import logging
 import re
+from typing import (
+    Any,
+    Iterable,
+    List,
+    Optional,
+)
+
+from ai21.models import DocumentType
 from langchain_core.documents import Document
 from langchain_text_splitters import TextSplitter
-from langchain_ai21.ai21_base import AI21Base, DocumentType
+
+from langchain_ai21.ai21_base import AI21Base
 
 logger = logging.getLogger(__name__)
 
 
 class AI21SemanticTextSplitter(TextSplitter):
-    """Splitting text into coherent and readable units, based on distinct topics and lines"""
+    """Splitting text into coherent and readable units,
+    based on distinct topics and lines
+    """
 
     def __init__(
             self,
@@ -33,7 +38,9 @@ class AI21SemanticTextSplitter(TextSplitter):
         Args:
             source: Specifies the text input for text segmentation
         """
-        response = self._ai21.client.segmentation.create(source=source, source_type=DocumentType.TEXT)
+        response = self._ai21.client.segmentation.create(
+            source=source, source_type=DocumentType.TEXT
+        )
         segments = [segment.segment_text for segment in response.segments]
         if self._chunk_size > 0:
             return self._merge_splits_no_seperator(segments)
@@ -45,10 +52,17 @@ class AI21SemanticTextSplitter(TextSplitter):
         Args:
             source: Specifies the text input for text segmentation
         """
-        response = self._ai21.client.segmentation.create(source=source, source_type=DocumentType.TEXT)
+        response = self._ai21.client.segmentation.create(
+            source=source,
+            source_type=DocumentType.TEXT
+        )
         documents = []
         for segment in response.segments:
-            documents.append(Document(page_content=segment.segment_text, metadata={"source_type": segment.segment_type}))
+            documents.append(
+                Document(
+                    page_content=segment.segment_text,
+                    metadata={"source_type": segment.segment_type}
+                ))
         return documents
 
     def create_documents(
@@ -65,7 +79,9 @@ class AI21SemanticTextSplitter(TextSplitter):
                 metadata = dict(copy.deepcopy(_metadatas[i]) | chunk.metadata)
                 if self._add_start_index:
                     offset = index + previous_chunk_len - self._chunk_overlap
-                    normalized_chunk = self._replace_continued_newlines(chunk.page_content)
+                    normalized_chunk = self._replace_continued_newlines(
+                        chunk.page_content
+                    )
                     index = normalized_text.find(normalized_chunk, max(0, offset))
                     metadata["start_index"] = index
                     previous_chunk_len = len(normalized_chunk)
@@ -87,7 +103,10 @@ class AI21SemanticTextSplitter(TextSplitter):
         for split in splits:
             split_len = self._length_function(split)
             if split_len > self._chunk_size:
-                logger.warning(f"Split of length {split_len} exceeds chunk size {self._chunk_size}.")
+                logger.warning(
+                    f"Split of length {split_len}"
+                    f"exceeds chunk size {self._chunk_size}."
+                )
             if self._length_function(current_chunk) + split_len > self._chunk_size:
                 if current_chunk != "":
                     chunks.append(current_chunk)
