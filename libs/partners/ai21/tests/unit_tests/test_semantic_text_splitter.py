@@ -4,6 +4,28 @@ import pytest
 
 from langchain_ai21 import AI21SemanticTextSplitter
 
+TEXT = (
+    "The original full name of the franchise is Pocket Monsters (ポケットモンスター, "
+    "Poketto Monsutā), which was abbreviated to "
+    "Pokemon during development of the original games.\n"
+    "When the franchise was released internationally, the short form of the title was "
+    "used, with an acute accent (´) "
+    "over the e to aid in pronunciation.\n"
+    "Pokémon refers to both the franchise itself and the creatures within its "
+    "fictional universe.\n"
+    "As a noun, it is identical in both the singular and plural, as is every "
+    "individual species name;[10] it is "
+    "grammatically correct to say \"one Pokémon\" and \"many Pokémon\", as well "
+    "as \"one Pikachu\" and \"many Pikachu\".\n"
+    "In English, Pokémon may be pronounced either /'powkɛmon/ (poe-keh-mon) or "
+    "/'powkɪmon/ (poe-key-mon).\n"
+    "The Pokémon franchise is set in a world in which humans coexist with creatures "
+    "known as Pokémon.\n"
+    "Pokémon Red and Blue contain 151 Pokémon species, with new ones being introduced "
+    "in subsequent games; as of December 2023, 1,025 Pokémon species have been "
+    "introduced.\n[b] Most Pokémon are inspired by real-world animals;[12] for example,"
+    "Pikachu are a yellow mouse-like species[13] with lightning bolt-shaped tails[14] "
+    "that possess electrical abilities.[15]")
 
 @pytest.mark.parametrize(
     ids=[
@@ -39,9 +61,24 @@ def test_split_text__on_large_chunk_size__should_merge_chunks(
     assert len(segments_merge) > 0
     assert len(segments_no_merge) > len(segments_merge)
 
+
 def test_split_text__on_small_chunk_size__should_not_merge_chunks(
     mock_client_with_semantic_text_splitter: Mock,
 ) -> None:
     sts_no_merge = AI21SemanticTextSplitter(client=mock_client_with_semantic_text_splitter)
     segments_merge = sts_no_merge.split_text("This is a test")
     assert len(segments_merge) == 2
+
+
+def test_create_documents__on_start_index(
+    mock_client_with_semantic_text_splitter: Mock,
+) -> None:
+    sts = AI21SemanticTextSplitter(client=mock_client_with_semantic_text_splitter, add_start_index=True)
+
+    response = sts.create_documents(texts=[TEXT])
+    assert len(response) > 0
+    for segment in response:
+        assert segment.page_content is not None
+        assert segment.metadata is not None
+        assert "start_index" in segment.metadata
+        assert segment.metadata["start_index"] > -1
