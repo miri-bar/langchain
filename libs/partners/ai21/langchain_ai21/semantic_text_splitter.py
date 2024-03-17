@@ -58,9 +58,12 @@ class AI21SemanticTextSplitter(TextSplitter):
         response = self._ai21_base.client.segmentation.create(
             source=source, source_type=DocumentType.TEXT
         )
+
         segments = [segment.segment_text for segment in response.segments]
+
         if self._chunk_size > 0:
             return self._merge_splits_no_seperator(segments)
+
         return segments
 
     def split_text_to_documents(self, source: str) -> List[Document]:
@@ -87,14 +90,19 @@ class AI21SemanticTextSplitter(TextSplitter):
         """Create documents from a list of texts."""
         _metadatas = metadatas or [{}] * len(texts)
         documents = []
+
         for i, text in enumerate(texts):
             normalized_text = self._replace_continued_newlines(text)
             index = 0
             previous_chunk_len = 0
+
             for chunk in self.split_text_to_documents(text):
+                # merge metadata from user (if exists) and from segmentation api
                 metadata = copy.deepcopy(_metadatas[i])
                 metadata.update(chunk.metadata)
+
                 if self._add_start_index:
+                    # find the start index of the chunk
                     offset = index + previous_chunk_len - self._chunk_overlap
                     normalized_chunk = self._replace_continued_newlines(
                         chunk.page_content
@@ -102,8 +110,10 @@ class AI21SemanticTextSplitter(TextSplitter):
                     index = normalized_text.find(normalized_chunk, max(0, offset))
                     metadata["start_index"] = index
                     previous_chunk_len = len(normalized_chunk)
+
                 new_doc = Document(page_content=chunk.page_content, metadata=metadata)
                 documents.append(new_doc)
+
         return documents
 
     def _replace_continued_newlines(self, string: str) -> str:
@@ -123,18 +133,24 @@ class AI21SemanticTextSplitter(TextSplitter):
         """
         chunks = []
         current_chunk = ""
+
         for split in splits:
             split_len = self._length_function(split)
+
             if split_len > self._chunk_size:
                 logger.warning(
                     f"Split of length {split_len}"
                     f"exceeds chunk size {self._chunk_size}."
                 )
+
             if self._length_function(current_chunk) + split_len > self._chunk_size:
                 if current_chunk != "":
                     chunks.append(current_chunk)
                     current_chunk = ""
+
             current_chunk += split
+
         if current_chunk != "":
             chunks.append(current_chunk)
+
         return chunks
