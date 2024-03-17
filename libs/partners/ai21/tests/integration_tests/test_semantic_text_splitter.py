@@ -120,21 +120,6 @@ def test_create_documents() -> None:
         assert document.metadata is not None
 
 
-def test_create_documents__add_start_index() -> None:
-    texts = [TEXT]
-    segmentation = AI21SemanticTextSplitter(add_start_index=True)
-    documents = segmentation.create_documents(texts=texts)
-    assert len(documents) > 0
-    previous_start_index = -1
-    for document in documents:
-        assert document.page_content is not None
-        assert document.metadata is not None
-        assert "start_index" in document.metadata
-        assert document.metadata["start_index"] != -1
-        assert document.metadata["start_index"] > previous_start_index
-        previous_start_index = document.metadata["start_index"]
-
-
 def test_split_documents() -> None:
     documents = [Document(page_content=TEXT, metadata={"foo": "bar"})]
     segmentation = AI21SemanticTextSplitter()

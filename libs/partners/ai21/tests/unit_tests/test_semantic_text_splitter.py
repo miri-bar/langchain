@@ -81,7 +81,7 @@ def test_split_text__on_small_chunk_size__should_not_merge_chunks(
     assert len(segments_merge) == 2
 
 
-def test_create_documents__on_start_index(
+def test_create_documents__on_start_index__should_should_add_start_index(
     mock_client_with_semantic_text_splitter: Mock,
 ) -> None:
     sts = AI21SemanticTextSplitter(
