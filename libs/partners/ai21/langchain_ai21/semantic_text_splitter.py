@@ -10,6 +10,7 @@ from typing import (
 
 from ai21.models import DocumentType
 from langchain_core.documents import Document
+from langchain_core.pydantic_v1 import SecretStr
 from langchain_text_splitters import TextSplitter
 
 from langchain_ai21.ai21_base import AI21Base
@@ -22,17 +23,16 @@ class AI21SemanticTextSplitter(TextSplitter):
     based on distinct topics and lines
     """
 
-    class Config:
-        """Configuration for this pydantic object."""
-
-        arbitrary_types_allowed = True
-
     def __init__(
-        self,
-        chunk_size: int = 0,
-        chunk_overlap: int = 0,
-        client: Optional[Any] = None,
-        **kwargs: Any,
+            self,
+            chunk_size: int = 0,
+            chunk_overlap: int = 0,
+            client: Optional[Any] = None,
+            api_key: Optional[SecretStr] = None,
+            api_host: Optional[str] = None,
+            timeout_sec: Optional[float] = None,
+            num_retries: Optional[int] = None,
+            **kwargs: Any,
     ) -> None:
         """Create a new TextSplitter."""
         super().__init__(
@@ -41,7 +41,13 @@ class AI21SemanticTextSplitter(TextSplitter):
             **kwargs,
         )
 
-        self._ai21_base = AI21Base(client=client)
+        self._ai21_base = AI21Base(
+            client=client,
+            api_key=api_key,
+            api_host=api_host,
+            timeout_sec=timeout_sec,
+            num_retries=num_retries,
+        )
 
     def split_text(self, source: str) -> List[str]:
         """Split text into multiple components.
@@ -66,18 +72,16 @@ class AI21SemanticTextSplitter(TextSplitter):
         response = self._ai21_base.client.segmentation.create(
             source=source, source_type=DocumentType.TEXT
         )
-        documents = []
-        for segment in response.segments:
-            documents.append(
-                Document(
-                    page_content=segment.segment_text,
-                    metadata={"source_type": segment.segment_type},
-                )
-            )
-        return documents
+
+        return [
+            Document(
+                page_content=segment.segment_text,
+                metadata={"source_type":segment.segment_type})
+            for segment in response.segments
+        ]
 
     def create_documents(
-        self, texts: List[str], metadatas: Optional[List[dict]] = None
+            self, texts: List[str], metadatas: Optional[List[dict]] = None
     ) -> List[Document]:
         """Create documents from a list of texts."""
         _metadatas = metadatas or [{}] * len(texts)
