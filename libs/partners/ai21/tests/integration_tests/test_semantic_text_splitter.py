@@ -78,7 +78,9 @@ def test_split_text__when_chunk_size_is_large__should_merge_segments() -> None:
     assert reconstructed_text_merged == reconstructed_text_non_merged
 
 
-def test_split_text__when_chunk_size_is_too_small__should_return_non_merged_segments() -> None:
+def test_split_text__chunk_size_is_too_small__should_return_non_merged_segments() -> (
+    None
+):
     segmentation_no_merge = AI21SemanticTextSplitter()
     segments_no_merge = segmentation_no_merge.split_text(source=TEXT)
     segmentation_merge = AI21SemanticTextSplitter(chunk_size=10)
