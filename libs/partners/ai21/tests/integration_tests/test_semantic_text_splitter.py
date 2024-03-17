@@ -50,7 +50,7 @@ TEXT = (
 )
 
 
-def test_invoke__split_text_to_document() -> None:
+def test_split_text_to_document() -> None:
     segmentation = AI21SemanticTextSplitter()
     segments = segmentation.split_text_to_documents(source=TEXT)
     assert len(segments) > 0
@@ -59,13 +59,13 @@ def test_invoke__split_text_to_document() -> None:
         assert segment.metadata is not None
 
 
-def test_invoke__split_text() -> None:
+def test_split_text() -> None:
     segmentation = AI21SemanticTextSplitter()
     segments = segmentation.split_text(source=TEXT)
     assert len(segments) > 0
 
 
-def test_invoke__split_text__chunk_size() -> None:
+def test_split_text__when_chunk_size_is_large__should_merge_segments() -> None:
     segmentation_no_merge = AI21SemanticTextSplitter()
     segments_no_merge = segmentation_no_merge.split_text(source=TEXT)
     segmentation_merge = AI21SemanticTextSplitter(chunk_size=1000)
@@ -78,7 +78,7 @@ def test_invoke__split_text__chunk_size() -> None:
     assert reconstructed_text_merged == reconstructed_text_non_merged
 
 
-def test_invoke__split_text__chunk_size__small_chunk_size() -> None:
+def test_split_text__when_chunk_size_is_too_small__should_return_non_merged_segments() -> None:
     segmentation_no_merge = AI21SemanticTextSplitter()
     segments_no_merge = segmentation_no_merge.split_text(source=TEXT)
     segmentation_merge = AI21SemanticTextSplitter(chunk_size=10)
@@ -91,7 +91,7 @@ def test_invoke__split_text__chunk_size__small_chunk_size() -> None:
     assert reconstructed_text_merged == reconstructed_text_non_merged
 
 
-def test_invoke__split_text__chunk_size__ai21_tokenizer() -> None:
+def test_split_text__when_chunk_size_set_with_ai21_tokenizer() -> None:
     segmentation_no_merge = AI21SemanticTextSplitter(
         length_function=AI21Client().count_tokens
     )
@@ -108,7 +108,7 @@ def test_invoke__split_text__chunk_size__ai21_tokenizer() -> None:
     assert reconstructed_text_merged == reconstructed_text_non_merged
 
 
-def test_invoke__create_documents() -> None:
+def test_create_documents() -> None:
     texts = [TEXT]
     segmentation = AI21SemanticTextSplitter()
     documents = segmentation.create_documents(texts=texts)
@@ -118,7 +118,7 @@ def test_invoke__create_documents() -> None:
         assert document.metadata is not None
 
 
-def test_invoke__create_documents__add_start_index() -> None:
+def test_create_documents__add_start_index() -> None:
     texts = [TEXT]
     segmentation = AI21SemanticTextSplitter(add_start_index=True)
     documents = segmentation.create_documents(texts=texts)
@@ -133,7 +133,7 @@ def test_invoke__create_documents__add_start_index() -> None:
         previous_start_index = document.metadata["start_index"]
 
 
-def test_invoke__split_documents() -> None:
+def test_split_documents() -> None:
     documents = [Document(page_content=TEXT, metadata={"foo": "bar"})]
     segmentation = AI21SemanticTextSplitter()
     segments = segmentation.split_documents(documents=documents)

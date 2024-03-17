@@ -111,10 +111,16 @@ class AI21SemanticTextSplitter(TextSplitter):
         return re.sub(r"\n{2,}", "\n", string)
 
     def _merge_splits(self, splits: Iterable[str], separator: str) -> List[str]:
+        """This method overrides the default implementation of TextSplitter"""
         return self._merge_splits_no_seperator(splits)
 
     def _merge_splits_no_seperator(self, splits: Iterable[str]) -> List[str]:
-        """Merge splits into chunks."""
+        """Merge splits into chunks.
+        If the segment size is bigger than chunk_size,
+        it will be left as is (won't be cut to match to chunk_size).
+        If the segment size is smaller than chunk_size,
+        it will be merged with the next segment until the chunk_size is reached.
+        """
         chunks = []
         current_chunk = ""
         for split in splits:
