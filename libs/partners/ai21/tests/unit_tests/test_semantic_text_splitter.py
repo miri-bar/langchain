@@ -44,8 +44,10 @@ def test_split_text__on_chunk_size(
     chunk_size: int,
     mock_client_with_semantic_text_splitter: Mock,
 ) -> None:
-    sts = AI21SemanticTextSplitter(chunk_size=chunk_size, client=mock_client_with_semantic_text_splitter)
-
+    sts = AI21SemanticTextSplitter(
+        chunk_size=chunk_size,
+        client=mock_client_with_semantic_text_splitter,
+    )
     response = sts.split_text("This is a test")
     assert len(response) > 0
 
@@ -53,8 +55,13 @@ def test_split_text__on_chunk_size(
 def test_split_text__on_large_chunk_size__should_merge_chunks(
     mock_client_with_semantic_text_splitter: Mock,
 ) -> None:
-    sts_no_merge = AI21SemanticTextSplitter(client=mock_client_with_semantic_text_splitter)
-    sts_merge = AI21SemanticTextSplitter(client=mock_client_with_semantic_text_splitter, chunk_size=1000)
+    sts_no_merge = AI21SemanticTextSplitter(
+        client=mock_client_with_semantic_text_splitter
+    )
+    sts_merge = AI21SemanticTextSplitter(
+        client=mock_client_with_semantic_text_splitter,
+        chunk_size=1000,
+    )
     segments_no_merge = sts_no_merge.split_text("This is a test")
     segments_merge = sts_merge.split_text("This is a test")
     assert len(segments_merge) > 0
@@ -65,7 +72,9 @@ def test_split_text__on_large_chunk_size__should_merge_chunks(
 def test_split_text__on_small_chunk_size__should_not_merge_chunks(
     mock_client_with_semantic_text_splitter: Mock,
 ) -> None:
-    sts_no_merge = AI21SemanticTextSplitter(client=mock_client_with_semantic_text_splitter)
+    sts_no_merge = AI21SemanticTextSplitter(
+        client=mock_client_with_semantic_text_splitter
+    )
     segments_merge = sts_no_merge.split_text("This is a test")
     assert len(segments_merge) == 2
 
@@ -73,7 +82,10 @@ def test_split_text__on_small_chunk_size__should_not_merge_chunks(
 def test_create_documents__on_start_index(
     mock_client_with_semantic_text_splitter: Mock,
 ) -> None:
-    sts = AI21SemanticTextSplitter(client=mock_client_with_semantic_text_splitter, add_start_index=True)
+    sts = AI21SemanticTextSplitter(
+        client=mock_client_with_semantic_text_splitter,
+        add_start_index=True,
+    )
 
     response = sts.create_documents(texts=[TEXT])
     assert len(response) > 0
