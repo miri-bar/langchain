@@ -15,8 +15,8 @@ TEXT = (
     "fictional universe.\n"
     "As a noun, it is identical in both the singular and plural, as is every "
     "individual species name;[10] it is "
-    "grammatically correct to say \"one Pokémon\" and \"many Pokémon\", as well "
-    "as \"one Pikachu\" and \"many Pikachu\".\n"
+    'grammatically correct to say "one Pokémon" and "many Pokémon", as well '
+    'as "one Pikachu" and "many Pikachu".\n'
     "In English, Pokémon may be pronounced either /'powkɛmon/ (poe-keh-mon) or "
     "/'powkɪmon/ (poe-key-mon).\n"
     "The Pokémon franchise is set in a world in which humans coexist with creatures "
@@ -25,13 +25,15 @@ TEXT = (
     "in subsequent games; as of December 2023, 1,025 Pokémon species have been "
     "introduced.\n[b] Most Pokémon are inspired by real-world animals;[12] for example,"
     "Pikachu are a yellow mouse-like species[13] with lightning bolt-shaped tails[14] "
-    "that possess electrical abilities.[15]")
+    "that possess electrical abilities.[15]"
+)
+
 
 @pytest.mark.parametrize(
     ids=[
-    "when_chunk_size_is_zero",
-    "when_chunk_size_is_large",
-    "when_chunk_size_is_small",
+        "when_chunk_size_is_zero",
+        "when_chunk_size_is_large",
+        "when_chunk_size_is_small",
     ],
     argnames=["chunk_size"],
     argvalues=[
@@ -100,8 +102,8 @@ def test_create_documents__on_metadata(
     mock_client_with_semantic_text_splitter: Mock,
 ) -> None:
     sts = AI21SemanticTextSplitter(client=mock_client_with_semantic_text_splitter)
-    metadatas = [{"hello":"world"}]
-    response = sts.create_documents(texts=[TEXT],metadatas=metadatas)
+    metadatas = [{"hello": "world"}]
+    response = sts.create_documents(texts=[TEXT], metadatas=metadatas)
     assert len(response) > 0
     for segment in response:
         assert segment.page_content is not None

@@ -24,14 +24,15 @@ class AI21SemanticTextSplitter(TextSplitter):
 
     class Config:
         """Configuration for this pydantic object."""
+
         arbitrary_types_allowed = True
 
     def __init__(
-            self,
-            chunk_size: Optional[int] = 0,
-            chunk_overlap: Optional[int] = 0,
-            client: Optional[Any] = None,
-            **kwargs: Any
+        self,
+        chunk_size: int = 0,
+        chunk_overlap: int = 0,
+        client: Optional[Any] = None,
+        **kwargs: Any,
     ) -> None:
         """Create a new TextSplitter."""
         super().__init__(
@@ -63,16 +64,16 @@ class AI21SemanticTextSplitter(TextSplitter):
             source: Specifies the text input for text segmentation
         """
         response = self._ai21_base.client.segmentation.create(
-            source=source,
-            source_type=DocumentType.TEXT
+            source=source, source_type=DocumentType.TEXT
         )
         documents = []
         for segment in response.segments:
             documents.append(
                 Document(
                     page_content=segment.segment_text,
-                    metadata={"source_type": segment.segment_type}
-                ))
+                    metadata={"source_type": segment.segment_type},
+                )
+            )
         return documents
 
     def create_documents(
@@ -101,7 +102,7 @@ class AI21SemanticTextSplitter(TextSplitter):
 
     def _replace_continued_newlines(self, string: str) -> str:
         """Use regular expression to replace sequences of '\n'"""
-        return re.sub(r'\n{2,}', '\n', string)
+        return re.sub(r"\n{2,}", "\n", string)
 
     def _merge_splits(self, splits: Iterable[str], separator: str) -> List[str]:
         return self._merge_splits_no_seperator(splits)
@@ -125,4 +126,3 @@ class AI21SemanticTextSplitter(TextSplitter):
         if current_chunk != "":
             chunks.append(current_chunk)
         return chunks
-

@@ -14,8 +14,8 @@ TEXT = (
     "fictional universe.\n"
     "As a noun, it is identical in both the singular and plural, as is every "
     "individual species name;[10] it is "
-    "grammatically correct to say \"one Pokémon\" and \"many Pokémon\", as well "
-    "as \"one Pikachu\" and \"many Pikachu\".\n"
+    'grammatically correct to say "one Pokémon" and "many Pokémon", as well '
+    'as "one Pikachu" and "many Pikachu".\n'
     "In English, Pokémon may be pronounced either /'powkɛmon/ (poe-keh-mon) or "
     "/'powkɪmon/ (poe-key-mon).\n"
     "The Pokémon franchise is set in a world in which humans coexist with creatures "
@@ -46,13 +46,13 @@ TEXT = (
     "undergo a form of spontaneous metamorphosis called Pokémon evolution, and "
     "transform into stronger forms.[26] Most Pokémon will evolve at a certain level, "
     "while others evolve through different means, such as exposure to a certain "
-    "item.[27]\n")
+    "item.[27]\n"
+)
 
 
 def test_invoke__split_text_to_document() -> None:
     segmentation = AI21SemanticTextSplitter()
-    segments = segmentation.split_text_to_documents(
-        source=TEXT)
+    segments = segmentation.split_text_to_documents(source=TEXT)
     assert len(segments) > 0
     for segment in segments:
         assert segment.page_content is not None
@@ -97,8 +97,8 @@ def test_invoke__split_text__chunk_size__ai21_tokenizer() -> None:
     )
     segments_no_merge = segmentation_no_merge.split_text(source=TEXT)
     segmentation_merge = AI21SemanticTextSplitter(
-        chunk_size=1000,
-        length_function=AI21Client().count_tokens)
+        chunk_size=1000, length_function=AI21Client().count_tokens
+    )
     segments_merge = segmentation_merge.split_text(source=TEXT)
     # Assert that a merge did happen
     assert len(segments_no_merge) > len(segments_merge)
