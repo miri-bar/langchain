@@ -24,15 +24,15 @@ class AI21SemanticTextSplitter(TextSplitter):
     """
 
     def __init__(
-            self,
-            chunk_size: int = 0,
-            chunk_overlap: int = 0,
-            client: Optional[Any] = None,
-            api_key: Optional[SecretStr] = None,
-            api_host: Optional[str] = None,
-            timeout_sec: Optional[float] = None,
-            num_retries: Optional[int] = None,
-            **kwargs: Any,
+        self,
+        chunk_size: int = 0,
+        chunk_overlap: int = 0,
+        client: Optional[Any] = None,
+        api_key: Optional[SecretStr] = None,
+        api_host: Optional[str] = None,
+        timeout_sec: Optional[float] = None,
+        num_retries: Optional[int] = None,
+        **kwargs: Any,
     ) -> None:
         """Create a new TextSplitter."""
         super().__init__(
@@ -76,12 +76,13 @@ class AI21SemanticTextSplitter(TextSplitter):
         return [
             Document(
                 page_content=segment.segment_text,
-                metadata={"source_type":segment.segment_type})
+                metadata={"source_type": segment.segment_type},
+            )
             for segment in response.segments
         ]
 
     def create_documents(
-            self, texts: List[str], metadatas: Optional[List[dict]] = None
+        self, texts: List[str], metadatas: Optional[List[dict]] = None
     ) -> List[Document]:
         """Create documents from a list of texts."""
         _metadatas = metadatas or [{}] * len(texts)
@@ -92,10 +93,7 @@ class AI21SemanticTextSplitter(TextSplitter):
             previous_chunk_len = 0
             for chunk in self.split_text_to_documents(text):
                 metadata = copy.deepcopy(_metadatas[i])
-                if metadata is not None:
-                    metadata.update(chunk.metadata)
-                else:
-                    metadata = copy.deepcopy(chunk.metadata)
+                metadata.update(chunk.metadata)
                 if self._add_start_index:
                     offset = index + previous_chunk_len - self._chunk_overlap
                     normalized_chunk = self._replace_continued_newlines(
