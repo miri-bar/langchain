@@ -112,8 +112,7 @@ class AI21SemanticTextSplitter(TextSplitter):
                 new_doc = Document(page_content=chunk.page_content, metadata=metadata)
                 documents.append(new_doc)
 
-        # return documents
-        return [Document(page_content="miri", metadata={"source_type": "miri"})]
+        return documents
 
     def _normalized_text(self, string: str) -> str:
         """Use regular expression to replace sequences of '\n'"""
