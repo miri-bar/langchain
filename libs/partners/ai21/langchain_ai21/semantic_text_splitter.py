@@ -104,9 +104,7 @@ class AI21SemanticTextSplitter(TextSplitter):
                 if self._add_start_index:
                     # find the start index of the chunk
                     offset = index + previous_chunk_len - self._chunk_overlap
-                    normalized_chunk = self._normalized_text(
-                        chunk.page_content
-                    )
+                    normalized_chunk = self._normalized_text(chunk.page_content)
                     index = normalized_text.find(normalized_chunk, max(0, offset))
                     metadata["start_index"] = index
                     previous_chunk_len = len(normalized_chunk)
