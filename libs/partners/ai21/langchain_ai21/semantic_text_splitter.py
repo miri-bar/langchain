@@ -92,7 +92,7 @@ class AI21SemanticTextSplitter(TextSplitter):
         documents = []
 
         for i, text in enumerate(texts):
-            normalized_text = self._replace_continued_newlines(text)
+            normalized_text = self._normalized_text(text)
             index = 0
             previous_chunk_len = 0
 
@@ -104,7 +104,7 @@ class AI21SemanticTextSplitter(TextSplitter):
                 if self._add_start_index:
                     # find the start index of the chunk
                     offset = index + previous_chunk_len - self._chunk_overlap
-                    normalized_chunk = self._replace_continued_newlines(
+                    normalized_chunk = self._normalized_text(
                         chunk.page_content
                     )
                     index = normalized_text.find(normalized_chunk, max(0, offset))
@@ -114,11 +114,12 @@ class AI21SemanticTextSplitter(TextSplitter):
                 new_doc = Document(page_content=chunk.page_content, metadata=metadata)
                 documents.append(new_doc)
 
-        return documents
+        # return documents
+        return [Document(page_content="miri", metadata={"source_type": "miri"})]
 
-    def _replace_continued_newlines(self, string: str) -> str:
+    def _normalized_text(self, string: str) -> str:
         """Use regular expression to replace sequences of '\n'"""
-        return re.sub(r"\n{2,}", "\n", string)
+        return re.sub(r"\s+", "", string)
 
     def _merge_splits(self, splits: Iterable[str], separator: str) -> List[str]:
         """This method overrides the default implementation of TextSplitter"""
