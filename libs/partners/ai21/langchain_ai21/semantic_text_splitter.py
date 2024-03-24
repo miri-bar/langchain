@@ -41,13 +41,13 @@ class AI21SemanticTextSplitter(TextSplitter):
             **kwargs,
         )
 
-        self._ai21_base = AI21Base(
+        self._segmentation = AI21Base(
             client=client,
             api_key=api_key,
             api_host=api_host,
             timeout_sec=timeout_sec,
             num_retries=num_retries,
-        )
+        ).client.segmentation
 
     def split_text(self, source: str) -> List[str]:
         """Split text into multiple components.
@@ -55,7 +55,7 @@ class AI21SemanticTextSplitter(TextSplitter):
         Args:
             source: Specifies the text input for text segmentation
         """
-        response = self._ai21_base.client.segmentation.create(
+        response = self._segmentation.create(
             source=source, source_type=DocumentType.TEXT
         )
 
@@ -72,7 +72,7 @@ class AI21SemanticTextSplitter(TextSplitter):
         Args:
             source: Specifies the text input for text segmentation
         """
-        response = self._ai21_base.client.segmentation.create(
+        response = self._segmentation.create(
             source=source, source_type=DocumentType.TEXT
         )
 
@@ -109,8 +109,12 @@ class AI21SemanticTextSplitter(TextSplitter):
                     metadata["start_index"] = index
                     previous_chunk_len = len(normalized_chunk)
 
-                new_doc = Document(page_content=chunk.page_content, metadata=metadata)
-                documents.append(new_doc)
+                documents.append(
+                    Document(
+                        page_content=chunk.page_content,
+                        metadata=metadata,
+                    )
+                )
 
         return documents
 
