@@ -102,22 +102,21 @@ def test_create_documents__on_start_index__should_should_add_start_index(
         assert segment.metadata["start_index"] > -1
 
 
-def test_create_documents__on_metadata(
+def test_create_documents__when_metadata_from_user__should_add_metadata(
     mock_client_with_semantic_text_splitter: Mock,
 ) -> None:
     sts = AI21SemanticTextSplitter(client=mock_client_with_semantic_text_splitter)
     metadatas = [{"hello": "world"}]
     response = sts.create_documents(texts=[TEXT], metadatas=metadatas)
     assert len(response) > 0
-    for segment in response:
-        assert segment.page_content is not None
-        assert segment.metadata is not None
-        assert len(segment.metadata) == 2
-        assert "source_type" in segment.metadata
-        assert segment.metadata["source_type"] is not None
+    for index in range(len(response)):
+        assert response[index].page_content == SEGMENTS[index].segment_text
+        assert len(response[index].metadata) == 2
+        assert response[index].metadata["source_type"] == SEGMENTS[index].segment_type
+        assert response[index].metadata["hello"] == "world"
 
 
-def test_split_text_to_documents__on_metadata_exists(
+def test_split_text_to_documents__when_metadata_not_passed__should_contain_source_type(
     mock_client_with_semantic_text_splitter: Mock,
 ) -> None:
     sts = AI21SemanticTextSplitter(client=mock_client_with_semantic_text_splitter)
